@@ -11,8 +11,18 @@ const bindAndPassCtx = (ctx, ...funcs) => {
 }
 
 const createClass = (...args) => {
+
+
   const displayName = args.length === 2 ? args[0] : null;
   const objOrRenderFunc = last(args); 
+
+  if (typeof objOrRenderFunc === 'function') {
+    //TODO - lt: vvv test
+    objOrRenderFunc.type = objOrRenderFunc.name;
+    return objOrRenderFunc;
+  }
+
+
   const {getDerivedStateFromProps = null} = objOrRenderFunc;
   
   const methodsObj = isObject(objOrRenderFunc) 
@@ -37,9 +47,8 @@ const createClass = (...args) => {
     }  
   };
 
-  if (displayName) {
-    newClass.displayName = displayName;
-  }
+  newClass.displayName = displayName || 'Component';
+  
 
   if (getDerivedStateFromProps) {
     newClass.getDerivedStateFromProps = getDerivedStateFromProps.bind(null);
@@ -72,4 +81,4 @@ const App = component('Apple', {
 ReactDOM.render(
   App({startVal: 'monty'}),
   document.getElementById('root')
-)
+);
