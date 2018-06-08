@@ -1,0 +1,15 @@
+{
+  "name": "react-exp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "lightweight-utils": "^0.0.13"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
