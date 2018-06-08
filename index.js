@@ -1,4 +1,4 @@
-import {bindTo, keys, values, entries, mapObj, iterateObj, isObject, wrap, compose, last} from './node_modules/lightweight-utils/index.js';
+import {bindTo, keys, values, entries, mapObj, iterateObj, isObject, wrap, compose, last, omit} from './node_modules/lightweight-utils/index.js';
 import domEls from './domFactories.js';
 
 const {React, ReactDOM} = window;
@@ -12,8 +12,16 @@ const bindAndPassCtx = (ctx, ...funcs) => {
 
 const createClass = (...args) => {
   const displayName = args.length === 2 ? args[0] : null;
-  const objOrRender = last(args); 
-  const methodsObj = isObject(objOrRender) ? objOrRender : {render: objOrRender};
+  const objOrRenderFunc = last(args); 
+  const {getDerivedStateFromProps = null} = objOrRenderFunc;
+  
+  const methodsObj = isObject(objOrRenderFunc) 
+    ? omit(objOrRenderFunc, ['getDerivedStateFromProps'])  
+    : {render: objOrRenderFunc};
+
+
+  methodsObj.getInitialState = methodsObj.getInitialState || wrap({});
+  
   const newClass = class extends Component {
 
     constructor(props) {
@@ -25,19 +33,28 @@ const createClass = (...args) => {
         ...values(methodsObj)
       )
 
-      const {getInitialState = wrap({})} = instance; 
-      this.state = getInitialState(props);
-    }
+      this.state = instance.getInitialState(props);
+    }  
   };
+
   if (displayName) {
     newClass.displayName = displayName;
   }
+
+  if (getDerivedStateFromProps) {
+    newClass.getDerivedStateFromProps = getDerivedStateFromProps.bind(null);
+  }
+
+
   return newClass;
 }
 
 const component = compose(createFactory, createClass);
 
 const App = component('Apple', {
+  getDerivedStateFromProps(props, state) {
+    return {next: state.next + '1'};
+  },
   componentDidUpdate(c, prev, xet) {
     console.log('will..', c, prev, xet); 
   },
