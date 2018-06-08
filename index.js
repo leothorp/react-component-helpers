@@ -1,54 +1,54 @@
-import {bindTo, keys, values, entries, mapObj, iterateObj, isObject, wrap, compose} from './node_modules/lightweight-utils/index.js';
+import {bindTo, keys, values, entries, mapObj, iterateObj, isObject, wrap, compose, last} from './node_modules/lightweight-utils/index.js';
+import domEls from './domFactories.js';
 
 const {React, ReactDOM} = window;
-console.log(React, ReactDOM);
-
-
+//TODO - lt: vvv make it agnostic as to which implementation of the React API it uses
 const {createFactory, Component, Fragment} = React;
+const {div} = domEls;
+//TODO - lt: vvv add to lw-utils
+const bindAndPassCtx = (ctx, ...funcs) => {
+  funcs.forEach(fn => ctx[fn.name] = fn.bind(null, ctx));
+}
 
-const [div, span, p] = ['div', 'span', 'p'].map(createFactory);
-
-
-const createClass = (objOrRender) => {
+const createClass = (...args) => {
+  const displayName = args.length === 2 ? args[0] : null;
+  const objOrRender = last(args); 
   const methodsObj = isObject(objOrRender) ? objOrRender : {render: objOrRender};
-  return class extends Component {
+  const newClass = class extends Component {
+
     constructor(props) {
       super(props);
-      console.log(methodsObj);
+      const instance = this;
 
-      bindTo(this,
+
+      bindAndPassCtx(instance,
         ...values(methodsObj)
       )
 
-      this.state = (this.getInitialState || wrap({}))(props);
+      const {getInitialState = wrap({})} = instance; 
+      this.state = getInitialState(props);
     }
-
-    render() {
-      return methodsObj.render();
-    }
-
-
-
-    testClick() {
-      this.setS
-    }
+  };
+  if (displayName) {
+    newClass.displayName = displayName;
   }
+  return newClass;
 }
 
 const component = compose(createFactory, createClass);
 
-const App = component({
-  componentWillMount() {
-    console.log('will..'); 
+const App = component('Apple', {
+  componentDidUpdate(c, prev, xet) {
+    console.log('will..', c, prev, xet); 
   },
-  getInitialState(props) {
+  getInitialState(c, props) {
     return {curr: props.startVal};
   },
-  render() {
-    return  div({onClick: this.testClick}, this.state.curr);
+  render(c) {   
+    return  div({onClick: c.testClick}, c.state.curr);
   },
-  testClick() {
-    this.setState({curr: this.state.curr + '1'});
+  testClick(c) {
+    c.setState({curr: c.state.curr + '1'});
   }
 });
 

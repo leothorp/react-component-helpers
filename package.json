@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "lightweight-utils": "^0.0.13"
+    "lightweight-utils": "^0.0.13",
+    "react-dom-factories": "^1.0.2"
   },
   "keywords": [],
   "author": "",
